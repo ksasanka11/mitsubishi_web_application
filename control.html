@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Corona Automation Controlling</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/styles.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="css/led.css" />
+    <link rel="stylesheet" type="text/css" href="css/Chart.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery-3.4.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var is_pneumatic = false;
+        function setSpeed(){
+            var ele = document.getElementsByName('speed');
+            for(i = 0; i < ele.length; i++) {
+                if(ele[i].checked){
+                    console.log(ele[i].value);
+                    WriteDeviceBlockTbl(ele[i], ele[i].value, 'B', 1);
+                }else{
+                    WriteDeviceBlockTbl(ele[i], ele[i].value, 'B', 0);
+                }
+            }
+        }
+
+        function setMovement(){
+            var ele = document.getElementsByName('movement');
+            for(i = 0; i < ele.length; i++) {
+                if(ele[i].checked){
+                    //console.log(ele[i].value + " " +ele[i].name);
+                    WriteDeviceBlockTbl(ele[i], ele[i].value, 'B', 1);
+                }else{
+                    WriteDeviceBlockTbl(ele[i], ele[i].value, 'B', 0);
+                }
+            }
+        }
+
+        function setPneumatic(){
+            var ele = document.getElementById('pneumatic');
+            if(is_pneumatic != ele.checked){
+                console.log(ele.tagName +"  "+ ele.checked+" "+ele.value);
+                is_pneumatic = ele.checked;
+                if(is_pneumatic == true){
+                    WriteDeviceBlockTbl(ele, ele.value, 'B', 1);
+                }else{
+                    WriteDeviceBlockTbl(ele, ele.value, 'B', 0);
+                }
+            }
+        }
+
+        function setValues(ele_id, dev, mem, flag){
+            var ele = document.getElementById(ele_id);
+            console.log(ele.value +" "+ dev);
+
+            WriteDeviceBlockTbl(ele, dev, 'D', ele.value, mem, flag);
+        }
+
+        function WriteDeviceBlockTbl(ele, dev, typ, data, mem='', flag = 0) {
+            var dataitem;
+            var xhr;
+            var ele_name = ele.name;
+            var param;
+
+            // Request to the CGI
+
+            // xhr.send(param);
+
+            if(flag == 0){
+                param = "NUM=1";
+                param += "&DEV1=" + dev;
+                param += "&TYP1=" + typ;
+                param += "&DATA1=" + parseInt(data).toString(16);
+                console.log(ele_name + " " + param);
+                xhr = new XMLHttpRequest();
+                xhr.open('POST', "/cgi/WrDev.cgi", true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                var FUNC = function() { WriteDeviceBlockTbl_Response(xhr); }; // Response analysis function setting
+                xhr.onreadystatechange = FUNC;
+                xhr.send(param);
+            }else{
+                console.log("USing mem");
+                if(dev == 'D57'){
+                    data = data*11;
+                }
+                param = "NUM=1";
+                param += "&DEV1=" + dev;
+                param += "&TYP1=" + typ;
+                param += "&DATA1=" + parseInt(data).toString(16);
+                console.log(ele_name + " " + param);
+
+                xhr = new XMLHttpRequest();
+                xhr.open('POST', "/cgi/WrDev.cgi", true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                var FUNC = function() { WriteDeviceBlockTbl_Response(xhr); }; // Response analysis function setting
+                xhr.onreadystatechange = FUNC;
+                xhr.send(param);
+
+                param = "NUM=1";
+                param += "&DEV1=" + mem;
+                param += "&TYP1=" + 'B';
+                param += "&DATA1=" + parseInt(flag).toString(16);
+                console.log(ele_name + " " + param);
+
+                xhr = new XMLHttpRequest();
+                xhr.open('POST', "/cgi/WrDev.cgi", true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                var FUNC = function() { WriteDeviceBlockTbl_Response(xhr); }; // Response analysis function setting
+                xhr.onreadystatechange = FUNC;
+                xhr.send(param);
+            }
+        }
+
+        // The function for analyzing a response
+        function WriteDeviceBlockTbl_Response(xhr) {
+            // XMLHttpRequest Client status check
+            // 0:UNSENT 1:OPENED 2:HEADERS_RECEIVED 3:LOADING 4:DONE
+            if( 4 != xhr.readyState ) {
+              // End the processing if the status 4 is other than DONE (operation complete).
+              return;
+            }
+            // HTTP Response code check
+            if ( 200 != xhr.status ) {
+              // Display the error dialog box if the response code is other than "200 OK".
+              alert("HTTP STATUS ERROR=" + xhr.status );
+              return;
+            }
+            var value;
+            var res = JSON.parse( xhr.response ); // Analysis processing of JSON string
+            // Judgment from the CGI
+            if( res.RET != "0000" ) {
+              // Display the error dialog box if the result is abnormal.
+              alert("ERROR=" + res.RET);
+            }
+            else {
+              // Reflect the write result value if the result is normal.
+              // dataitem.value = parseInt(res.DATA[0],16);
+              console.log("write complete");
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="wrapper clear">
+
+            <div class="media float">
+              <img src="outline_cached_black_24dp.png" alt="John Doe" class="rounded-circle" style="width: 40px;background: lightskyblue;padding: 3px;border-radius: 5px;z-index: 999;position: fixed;/* float: right; */">
+            </div>
+            <div class="gauge" style="text-align: left; border-top: none;margin-left: 10px;">
+                <span>Over limit temperature</span><br>
+                <input class="num_con" type="text" id="OLT" name="over_limit_temperature">
+                <button type="button" class="btn btn-info btn_con" onclick="setValues('OLT', 'D370', 'M70', 1)">OK</button>
+            </div>
+
+            <div class="gauge" style="text-align: left; border-top: none;margin-left: 10px;">
+                <span>Overload current</span><br>
+                <input class="num_con" type="text" id="OC" name="current_overload">
+                <button type="button" class="btn btn-info btn_con" onclick="setValues('OC', 'D390', 'M71', 1)">OK</button>
+            </div>
+
+            <div class="gauge" style="text-align: left; border-top: none;margin-left: 10px;">
+                <span>Corona discharge intensity</span><br>
+                <input class="num_con" type="text" id="CDS" name="corona_discharge_intensity">
+                <button type="button" class="btn btn-info btn_con" onclick="setValues('CDS', 'D57', 'M8', 1)">OK</button>
+            </div>
+
+            <div class="gauge" style="text-align: left; border-top: none;margin-left: 10px;">
+                <span>Line/film speed</span><br>
+                <input class="num_con" type="text" id="LFS" name="line_film_speed">
+                <button type="button" class="btn btn-info btn_con" onclick="setValues('LFS', 'D920', 'M15', 1)">OK</button>
+            </div>
+
+
+            <div class="gauge" style="text-align: left; border-top: none;margin-left: 10px;">
+                <span>Inventory Film</span><br>
+                <input class="num_con" type="text" id="IF" name="inventory_film">
+                <button type="button" class="btn btn-info btn_con" onclick="setValues('IF', 'D999', 'M99', 1)">OK</button>
+            </div>
+
+            <div class="gauge" style="text-align: left; border-top: none;margin-left: 10px;">
+                <span>Pneumatic control</span>
+                <label class="switch" onclick="setPneumatic()" style="top: 5px;margin-bottom: 0px; float: right;margin-left: 15px">
+                  <input type="checkbox" name="pneumatic" id="pneumatic" value="M61">
+                  <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div class="gauge" style="text-align: left; border-top: none;">
+                <h4 class="col">Movement Control</h4>
+                <label class="col"><input type="radio" class="radio_con" name="movement" value="M7">Forward switch<br></label>
+                <label class="col"><input type="radio" class="radio_con" name="movement" value="M6">Reverse switch<br></label>
+                <button type="button" class="btn btn-info btn_con col" onclick="setMovement()">OK</button>
+            </div>
+
+            <div class="gauge" style="text-align: left; border-top: none;">
+                <h4 class="col">Speed Control</h4>
+                <label class="col"><input type="radio" class="radio_con" name="speed" value="M12">Low speed switch<br></label>
+                <label class="col"><input type="radio" class="radio_con" name="speed" value="M11">Medium speed switch<br></label>
+                <label class="col"><input type="radio" class="radio_con" name="speed" value="M10">High speed switch<br></label>
+                <button type="button" class="btn btn-info btn_con col" onclick="setSpeed()">OK</button>
+            </div>
+
+    </div>
+    </div>
+</body>
+
+</html>

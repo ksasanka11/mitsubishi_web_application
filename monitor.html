@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Corona Automation Monitoring</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/styles.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="css/led.css" />
+    <link rel="stylesheet" type="text/css" href="css/Chart.css">
+</head>
+<body>
+    <div class="wrapper clear">
+        <div class="gauge" style="text-align: left; margin-left:5px; width: 100%; margin-bottom: 10px; border-top: none;">
+            <div class="row">
+                <div class="col">Thermal Overload</div>
+                <div id="TO" class="col led led-green"></div>
+            </div>
+            <div class="row">
+                <div class="col">IGBT Driver</div>
+                <div id="IGBT" class="col led led-green"></div>
+            </div>
+            <div class="row">
+                <div class="col">Ozone Extractor</div>
+                <div id="OE" class="col led led-green"></div>
+            </div>
+            <div class="row">
+                <div class="col">Piston</div>
+                <div id="PI" class="col led led-green"></div>
+            </div>
+            <div class="row">
+                <div class="col">Servo</div>
+                <div id="S" class="col led led-green"></div>
+            </div>
+
+        </div>
+        <div id="LS" class="gauge"></div>
+        <div id="F" class="gauge"></div>
+        <div id="C" class="gauge"></div>
+        <div id="O" class="gauge"></div>
+        <div class="gauge">
+            <p>Inventory film - <span id="I">0</span> meters\n</p>
+        </div>
+        <div class="gauge" style="border-top: none;">
+            <p>Treated film : <span id="TF">0</span> meters\n</p>
+        </div>
+        <div class="gauge" style="border-top: none;">
+            <p>Piston pressure : <span id="P">0</span> psi\n</p>
+        </div>
+
+        <canvas class="gauge" id="T" height="8" width="10" />
+
+  </div>
+
+
+  <script src="./js/raphael-2.1.4.min.js"></script>
+  <script src="./js/justgage.js"></script>
+  <script src="./js/Chart.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        var g1, g2, g3;
+        var ctx = document.getElementById('T');
+        var temp_data = [12, 19, 3, 5, 2, 3, 1, 5, 9];
+        var counter = 10;
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            responsive: true,
+            data: {
+                labels: [1,2,3,4,5,6,7,8,9,10],
+                datasets: [{
+                    label: 'Temperature (in ℃)',
+                    data: temp_data,
+                    borderColor: [
+                    'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                tooltips: {
+                    mode: 'point'
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+        var LS = new JustGage({
+            id: "LS",
+            value: Math.random() * 15,
+            min: 0,
+            max: 15,
+            title: "Line Speed",
+            relativeGaugeSize: true,
+            pointer: true,
+            decimals: 2,
+            symbol:' m/s',
+            valueMinFontSize: 1,
+            gaugeWidthScale: 0.5,
+        });
+
+        var F = new JustGage({
+            id: "F",
+            value: Math.random() * (25 - 8)+ 8,
+            min: 8,
+            max: 25,
+            title: "Frequency",
+            relativeGaugeSize: true,
+            pointer: true,
+            decimals: 2,
+            symbol:'\nKHz',
+            valueMinFontSize: 1,
+            gaugeWidthScale: 0.5,
+        });
+
+        var C = new JustGage({
+            id: "C",
+            title:"Current",
+            value: Math.random() * 7,
+            min: 0,
+            max: 7,
+            relativeGaugeSize: true,
+            pointer: true,
+            decimals: 2,
+            symbol: ' A',
+            valueMinFontSize: 1,
+            gaugeWidthScale: 0.5,
+        });
+
+
+        var O = new JustGage({
+            id: "O",
+            value: Math.random() * 4000,
+            min: 0,
+            max: 4000,
+            title: "Ozone Extractor Speed",
+            relativeGaugeSize: true,
+            pointer: true,
+            decimals: 2,
+            symbol:'\nrpm',
+            valueMinFontSize: 1,
+            gaugeWidthScale: 0.5,
+        });
+
+        // ReadDeviceRandomTbl();
+        setInterval(function(){
+          ReadDeviceRandomTbl();
+        }, 3000);
+
+        function ReadDeviceRandomTbl() {
+            var param;
+            // // Number of device points setting
+
+            param += "NUM=D"; //D - 13
+            param += "&DEV1=D200&TYP1=D";// Line speed
+            param += "&DEV2=D100&TYP2=D";// Frequency
+            param += "&DEV3=D27&TYP3=D";// Current
+            param += "&DEV4=D550&TYP4=D";// Ozone extractor speed
+            param += "&DEV5=D25&TYP5=D";// Temperature
+            param += "&DEV6=D570&TYP6=D";// Inventory film
+            param += "&DEV7=D200&TYP7=D";// Treated film // To be checked
+            param += "&DEV8=D900&TYP8=D";// Piston pressure
+            param += "&DEV9=M3&TYP9=B";// Thermal overload
+            param += "&DEV10=Y0005&TYP10=B";// IGBT driver
+            param += "&DEV11=M4&TYP11=B";// Ozone extractor
+            param += "&DEV12=Y0014&TYP12=B";// Piston
+            param += "&DEV13=M15&TYP13=B";// Servo
+            var dev = [LS, F, C, O, myChart, "I", "TF", "P", "TO", "IGBT", "OE", "PI", "S"];
+            console.log(dev);
+            //Request to the CGI
+            xhr = new XMLHttpRequest();
+            xhr.open('POST', "/cgi/RdDevRnd.cgi", true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            var FUNC = function() { ReadDeviceRandomTbl_Response(xhr, dev); }; // Response analysis function setting
+            xhr.onreadystatechange = FUNC;
+            xhr.send(param);
+        }
+
+        // The function for analyzing a response
+        function ReadDeviceRandomTbl_Response(xhr, dev) {
+            // XMLHttpRequest Client status check
+            // 0:UNSENT 1:OPENED 2:HEADERS_RECEIVED 3:LOADING 4:DONE
+            if( 4 != xhr.readyState ) {
+              // End the processing if the status 4 is other than DONE (operation complete).
+              return;
+            }
+            // HTTP Response code check
+            if ( 200 != xhr.status ) {
+              // Display the error dialog box if the response code is other than "200 OK".
+              alert("HTTP STATUS ERROR=" + xhr.status );
+              return;
+            }
+          var i, dataitem;
+          var res = JSON.parse( xhr.response ); // Analysis processing of JSON string
+          // Judgment from the CGI
+          if( res.RET != "0000" ) {
+            // Display the error dialog box if the result is abnormal.
+            alert("ERROR=" + res.RET);
+          }
+          else {
+              // Reflect the obtained value to the table if the result is normal.
+              console.log(res.DATA);
+              for ( i = 0; i < 13; i++) {
+                console.log(dev[i]+"  "+res.DATA[i]);
+                // Set the read result to the value of the table (convert the hexadecimal string to numerical value).
+                var value = parseInt(res.DATA[i], 16);
+                if(i == 4){
+                    temp_data.push(value/20);
+                    temp_data.shift();
+
+                    myChart.data.labels.push(++counter);
+                    myChart.data.labels.shift();
+                    myChart.update();
+                }else if(i < 4){
+
+                    if(i == 0){
+                        var temp = value*0.01413;
+                        console.log("==================");
+                        console.log(value + " " + temp);
+                        console.log("==================");
+                        
+                        dev[i].refresh(temp);
+                    }else if(i == 2){
+                        dev[i].refresh(value/800);
+                    }else{
+                        dev[i].refresh(value);
+                    }
+                }else if(i>4 && i<8){
+                    dataitem = document.getElementById(dev[i]);
+                    if(i == 6){
+                        dataitem.textContent = value*0.8478;
+                    }else{
+                        dataitem.textContent = value;
+                    }
+
+                }else{
+                    dataitem = document.getElementById(dev[i]);
+                    if(value == 1){
+                        dataitem.className = "col led led-green";
+                    }else{
+                        dataitem.className = "col led led-red";
+                    }
+                }
+
+              }
+              // alert("read complete");
+          }
+      }
+  });
+</script>
+</body>
+</html>

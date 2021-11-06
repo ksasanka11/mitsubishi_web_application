@@ -1,0 +1,189 @@
+body {
+        text-align: center;
+        padding: 0px;
+        margin: 5px 5px 5px 5px;
+    }
+    /* clearfix */
+
+    #title{
+        font-size: x-large;
+        font-family: sans-serif;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 50px
+    }
+
+    .row{
+        margin-top: 20px;
+    }
+
+    .center-block {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .clear:before,
+    .clear:after {
+        content: "";
+        display: table;
+    }
+
+    .clear:after {
+        clear: both;
+    }
+
+    .clear {
+        *zoom: 1;
+    }
+
+    .wrapper {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        margin: 20px;
+        border: 1px solid #cccccc;
+        overflow: auto;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 32px;
+      height: 17px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 10px;
+      width: 10px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(15px);
+      -ms-transform: translateX(15px);
+      transform: translateX(15px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    .gauge {
+        display: block;
+        float: left;
+        border-top: dotted;
+        margin-top: 15px;
+        border-width: thin;
+    }
+
+
+
+    #g1 #g2 {
+        width: 60%;
+    }
+
+    #g3 {
+        width: 20%;
+    }
+
+    .homebtn{
+        background: cadetblue;
+        padding: 20px 5px 20px 5px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-top: 50px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .homebtn:hover{
+        cursor: pointer;
+    }
+
+    div>a, div>a:hover{
+        color: black;
+        text-decoration: none;
+
+    }
+
+    .logo {
+        width: 100%;
+        height: auto;
+    }
+
+    .clglogo{
+        width: 100%;
+        height: auto;
+        max-width: 100px;
+    }
+
+    .num_con{
+        width: 160px;
+        /*border-radius: 5px;*/
+    }
+
+    div>.btn_con{
+        width: 40px;
+        height: 24px;
+        font-size: x-small;
+        /* text-align: center; */
+        padding: inherit;
+        margin-left: 15px;
+    }
+
+    div>label>.radio_con{
+        margin-right: 10px;
+    }
+
+    .float{
+      position:fixed;
+      background-color:#0C9;
+      color:#FFF;
+      border-radius:50px;
+      text-align:center;
+      box-shadow: 2px 2px 3px #999;
+    }
+
+    .my-float{
+      margin-top:22px;
+    }
